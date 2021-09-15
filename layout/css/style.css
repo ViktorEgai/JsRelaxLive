@@ -8977,3 +8977,7 @@ strong {
   transform: rotate(180deg);
   top: -20px;
 }
+.popup-repair-types {
+    display: none;
+    visibility: visible;
+}
