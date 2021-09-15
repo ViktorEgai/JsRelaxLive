@@ -3,7 +3,7 @@ const getRepairData = () => {
   const popupRepairTypes = () => {
     const popupRepairTypesDialog = document.querySelector('.popup-repair-types'),
       repairTypesBtn = document.querySelectorAll('.link-list a');
-console.log(popupRepairTypesDialog);
+
     const showPopup = () => {
       repairTypesBtn.forEach(item => {
         item.addEventListener('click', () => {
