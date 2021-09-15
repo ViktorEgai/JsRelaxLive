@@ -371,6 +371,7 @@ body {
 
 .text-warning{
     color: tomato;
+    display: none;
 }
 
 .label sup {
@@ -402,14 +403,15 @@ body {
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
+   
 }
 
 .table {
     min-width: 728px;
     width: 100%;
     border-collapse: collapse;
-
-}
+    
+}   
 
 .table-th {
     padding: 8px 20px;
@@ -456,6 +458,7 @@ body {
 .tbody {
     background-color: white;
     border-collapse: collapse;
+    
 }
 
 .table__row {
