@@ -57,7 +57,7 @@ const getRepairData = () => {
   };
 
   // получение данных с сервера
-  const getData = () => fetch('./db.json');
+  const getData = () => fetch('../db.json');
 
   // получение массива с темами услуг
   const getDataTypes = (data) => {
