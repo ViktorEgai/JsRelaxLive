@@ -1,13 +1,13 @@
 const getRepairData = () => {
   // попап 
   const popupRepairTypes = () => {
-    const popupRepairTypesDialog = document.querySelector('.popup-dialog-repair-types'),
+    const popupRepairTypesDialog = document.querySelector('.popup-repair-types'),
       repairTypesBtn = document.querySelectorAll('.link-list a');
 
     const showPopup = () => {
       repairTypesBtn.forEach(item => {
         item.addEventListener('click', () => {
-          popupRepairTypesDialog.style.visibility = 'visible';
+          popupRepairTypesDialog.style.display = 'flex';
         })
       })
     };
@@ -49,15 +49,15 @@ const getRepairData = () => {
 
       let target = event.target;
 
-      if (!target.closest('.popup-dialog-repair-types') && !target.closest('.link-list a')) {
-        popupRepairTypesDialog.style.visibility = 'hidden';
+      if (target.closest('.close') || target.tagName === 'svg') {
+        popupRepairTypesDialog.style.display = 'none';
 
       }
     })
   };
 
   // получение данных с сервера
-  const getData = () => fetch('../crm-backend/db.json');
+  const getData = () => fetch('../db.json');
 
   // получение массива с темами услуг
   const getDataTypes = (data) => {
