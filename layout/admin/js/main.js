@@ -6,7 +6,9 @@ const modal = document.getElementById('modal'),
   saveBtn = document.querySelector('.button-ui_firm'),
   addBtn = document.querySelector('.btn-addItem'),
   closeBtn = document.querySelector('.button__close'),
-  cancelBtn = document.querySelector('.cancel-button');
+  cancelBtn = document.querySelector('.cancel-button'),
+  thead = document.querySelector('thead');
+
 // редирект на страницу авторизации если куки пустые
 const redirect = () => {
   if (document.cookie === '') window.location.href = './index.html'
@@ -53,20 +55,19 @@ const editData = () => {
 
 // прогрузка данных из базы
 const showTable = () => {
-   while (tbody.firstChild) {
-        tbody.removeChild(tbody.firstChild);
-      };
+  while (tbody.firstChild) {
+    tbody.removeChild(tbody.firstChild);
+  };
 
   const getData = () => fetch('http://localhost:3000/api/items');
 
   const getDataTypes = (data) => {
     let typesArr = [];
-
     data.forEach(item => typesArr.push(item.type));
-
     typesArr = typesArr.filter((item, pos) => typesArr.indexOf(item) == pos);
     return typesArr;
   };
+
   const showData = (data, typeArr) => {
     const typeSelect = document.getElementById('typeItem'),
       tbody = document.getElementById('tbody');
@@ -75,6 +76,7 @@ const showTable = () => {
      while (typeSelect.firstChild) {
         typeSelect.removeChild(typeSelect.firstChild);
       };
+
     // список селект
     typeArr.forEach(item => {
       typeSelect.insertAdjacentHTML('beforeend', `
@@ -123,20 +125,89 @@ const showTable = () => {
       while (tbody.firstChild) {
         tbody.removeChild(tbody.firstChild);
       }
+      let filteredArr = [];
+      
       data.forEach(item => {
-        if (item.type === typeSelect.value) tbodyLayout(item);
+        if (item.type === typeSelect.value) {
+          tbodyLayout(item);
+          filteredArr.push(item);          
+          sortTable(filteredArr);
+        }
       });
       editData();
     })
-  }
+
+    // сортировка таблицы
+    const sortTable = (currentData) => {   
+      let sort;  
+      thead.addEventListener('click', event => {
+        const target = event.target;       
+
+        while (tbody.firstChild) {
+          tbody.removeChild(tbody.firstChild);
+          }
+       
+        if(target.closest('.th-id')) {   
+          const arrow = target.closest('.th-id').querySelector('.icon-sort');
+          if(!arrow.hasAttribute('style') || arrow.style.transform === 'rotate(0deg)') {   
+            arrow.style.transform = 'rotate(180deg)';        
+            sort =  currentData.sort((a, b) => a.id - b.id);
+            sort.forEach(item => tbodyLayout(item));
+          } else {
+            arrow.style.transform = 'rotate(0)';
+            sort =  currentData.sort((a, b) => b.id - a.id);
+            sort.forEach(item => tbodyLayout(item));
+          }
+        };
+        if(target.closest('.th-type')) {
+          const arrow = target.closest('.th-type').querySelector('.icon-sort');
+          if(!arrow.hasAttribute('style') || arrow.style.transform === 'rotate(0deg)') {   
+            arrow.style.transform = 'rotate(180deg)';                        
+            sort = currentData.sort((a, b) => a.type.localeCompare(b.type));     
+            sort.forEach(item => tbodyLayout(item));
+          } else {      
+            arrow.style.transform = 'rotate(0)';
+            sort = currentData.sort((a, b) => b.type.localeCompare(a.type));    
+            sort.forEach(item => tbodyLayout(item));
+          }
+        }
+        if(target.closest('.th-name')) {
+          const arrow = target.closest('.th-name').querySelector('.icon-sort');
+          if(!arrow.hasAttribute('style') || arrow.style.transform === 'rotate(0deg)') {   
+            arrow.style.transform = 'rotate(180deg)';                        
+            sort = currentData.sort((a, b) => a.name.localeCompare(b.name));     
+            sort.forEach(item => tbodyLayout(item));
+          } else {      
+            arrow.style.transform = 'rotate(0)';
+            sort = currentData.sort((a, b) => b.name.localeCompare(a.name));     
+
+            sort.forEach(item => tbodyLayout(item));
+          }
+        }
+        if(target.closest('.th-units')) {
+          const arrow = target.closest('.th-units').querySelector('.icon-sort');
+          if(!arrow.hasAttribute('style') || arrow.style.transform === 'rotate(0deg)') {   
+            arrow.style.transform = 'rotate(180deg)';                        
+            sort = currentData.sort((a, b) => a.units.localeCompare(b.units));     
+            sort.forEach(item => tbodyLayout(item));
+          } else {      
+            arrow.style.transform = 'rotate(0)';
+            sort = currentData.sort((a, b) => b.units.localeCompare(a.units));     
+
+            sort.forEach(item => tbodyLayout(item));
+          }
+        }      
+      })
+    };
+    sortTable(data);
+  } 
 
   getData()
-    .then(resolve => resolve.json())
+    .then(response =>  response.json())
     .then(data => {
       let typeArr = getDataTypes(data);
       showData(data, typeArr);
       editData();
-
     });
 };
 showTable();
@@ -149,17 +220,6 @@ const openPopup = (title = 'Добавление новой услуги') => {
 const closePopup = () => {   
     modal.style.display = 'none'; 
 };
-
-addBtn.addEventListener('click', ()=> {
-  openPopup();
-  form.id = 'newList';
-  inputs.forEach(input => input.value = '');
-  addNewItem();
-});  
-closeBtn.addEventListener('click', closePopup);
-cancelBtn.addEventListener('click', closePopup);
-
-
 
 // добавление нового товара в базу данных
 const addNewItem = (id) => {  
@@ -205,4 +265,14 @@ const addNewItem = (id) => {
   };
 
 };
+
+// ивенты
+addBtn.addEventListener('click', ()=> {
+  openPopup();
+  form.id = 'newList';
+  inputs.forEach(input => input.value = '');
+  addNewItem();
+});  
+closeBtn.addEventListener('click', closePopup);
+cancelBtn.addEventListener('click', closePopup);
 
