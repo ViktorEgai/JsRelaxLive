@@ -1,32 +1,40 @@
 const sendForm = () => {
   const popupThank = document.querySelector('.popup-thank');
-
-  const forms = document.querySelectorAll('form');
- 
+  const forms = document.querySelectorAll('form'); 
   const statusMessage = document.createElement('div');
   
+  // инпут номера телефона
+  const phoneInput = document.querySelectorAll('input[name="phone"]');
+  phoneInput.forEach(input => {
+    input.addEventListener('input', (event)=> {
+      let form = event.target.closest('form');
+      if(input.value.length < 18) {
+         form.querySelector('button').disabled = true;      
+      } else {
+        form.querySelector('button').disabled = false; 
+      }
+    })
+  })
   // обработчик для всех форм
   forms.forEach((form) => {
-    form.querySelector('button').disabled = true;
-    
+    form.querySelector('button').disabled = true;    
     // чекбокс 
     const checkbox = form.querySelector('.checkbox__input');
-    checkbox.addEventListener('change', () => {
-      
+    checkbox.addEventListener('change', () => {     
       if (form.querySelector('button').disabled) {
         form.querySelector('button').disabled = false;
       } else {
         form.querySelector('button').disabled = true;
       }
     })
-
+    
     // событие сабмит
     form.addEventListener('submit', (event) => {
       statusMessage.innerHTML = `
-	<div class='sk-double-bounce'>
-		<div class='sk-child sk-double-bounce-1'></div>
-		<div class='sk-child sk-double-bounce-2'></div>
-	</div>
+        <div class='sk-double-bounce'>
+          <div class='sk-child sk-double-bounce-1'></div>
+          <div class='sk-child sk-double-bounce-2'></div>
+        </div>
 				`;
       animStyle();
       event.preventDefault();
@@ -54,8 +62,9 @@ const sendForm = () => {
         input.value = '';        
         if(input.type === 'checkbox') input.checked = false;
       });
+      form.querySelector('button').disabled = true; 
     });
-     });
+  });
 
   // стили для анимации 
   const animStyle = () => {
