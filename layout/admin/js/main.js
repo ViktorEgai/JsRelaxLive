@@ -19,6 +19,7 @@ class AdminPanel {
     this.getData()
       .then(response => response.json())
       .then(data => {
+        
         this.showTable(data);
         let typeArr = this.getDataTypes(data);
         this.showSelect(typeArr);
