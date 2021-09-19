@@ -25,7 +25,7 @@ class AdminPanel {
         this.filterBySelect(data);
         this.sortTable(data);
         this.editData(data);
-        this.events(data);
+        this.events();
       });
     
   }
@@ -46,6 +46,28 @@ class AdminPanel {
   getData() {
     return fetch('http://localhost:3000/api/items');
   }  
+
+   // функция отправки данных
+  postData(body){  
+    return fetch('http://localhost:3000/api/items', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    }); 
+  }
+  
+  // функция изменения данных на сервере
+  changeData(id, body){       
+    return fetch(`http://localhost:3000/api/items/${id}` , {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });      
+  }
 
   // получения массива с типами услуг
   getDataTypes(data) {
@@ -110,8 +132,7 @@ class AdminPanel {
 
   // фильтрация по селекту
   filterBySelect(data) {
-    this.typeSelect.addEventListener('change', () => {
-     
+    this.typeSelect.addEventListener('change', () => {     
       this.cleanTbody();
       // при выборе "Все типы" отображать всю таблицу
       if (this.typeSelect.value === 'Все типы') this.showTable(data);
@@ -123,8 +144,7 @@ class AdminPanel {
           this.sortTable(filteredArr);          
         }
       });
-      this.editData(data);
-
+      this.editData();
     })
   }
 
@@ -132,7 +152,7 @@ class AdminPanel {
   showTable(data) {
     this.cleanTbody();
     // данные в таблице
-    data.forEach(item => this.tbodyLayout(item));
+    data.forEach(item => this.tbodyLayout(item)); 
   }
 
   // сортировка таблицы
@@ -195,6 +215,8 @@ class AdminPanel {
           sort.forEach(item => this.tbodyLayout(item));
         }
       }
+
+      this.editData();
     })
   };
 
@@ -205,30 +227,8 @@ class AdminPanel {
   };
   closePopup() {
     this.modal.style.display = 'none';
-  };
-  
-  // функция отправки данных
-  postData(body){  
-    return fetch('http://localhost:3000/api/items', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    }); 
-  };
-  
-  // функция изменения данных на сервере
-  changeData(id, body){   
-    console.log(id);
-    return fetch('http://localhost:3000/api/items/' + id, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });      
-  }
+    
+  }; 
 
   // текушая таблица 
   currentTable() {       
@@ -236,6 +236,7 @@ class AdminPanel {
     this.getData()
       .then(response => response.json())
       .then(data => {
+        
         if(this.typeSelect.value === 'Все типы') this.showTable(data);
         let filteredArr = [];
         data.forEach(item => {
@@ -245,34 +246,36 @@ class AdminPanel {
             this.sortTable(filteredArr);
           }
         });
-        this.editData();
+        this.editData();             
+      
       });
   }
 
+  // действия "Изменить" "Удалить"
   editData() {   
     const tablelist = this.tbody.querySelectorAll('.table__row');    
     tablelist.forEach(item => {
-      item.addEventListener('click', event => {
-        const target = event.target;
-
-        const id = item.querySelector('.table__id').textContent,
+      const id = item.querySelector('.table__id').textContent,
           type = item.querySelector('.table-type').textContent,
           name = item.querySelector('.table-name').textContent,
           units = item.querySelector('.table-units').textContent,
           cost = item.querySelector('.table-cost').textContent;
 
+      item.addEventListener('click', event => {
+        const target = event.target;
+
         // кнопка изменить
         if (target.closest('.action-change')) {          
-          this.form.id = 'editList';
+          this.form.id = id;
           this.openPopup('Редактировать услугу');
           this.inputs.forEach((input) => {
             if (input.id === 'type') input.value = type;
             if (input.id === 'name') input.value = name;
             if (input.id === 'units') input.value = units;
             if (input.id === 'cost') input.value = cost;
-          });
-          this.saveBtnEvent(id);
+          });         
         }
+        
         // кнопка удалить
         if (target.closest('.action-remove')) {
           fetch('http://localhost:3000/api/items/' + id, {
@@ -287,60 +290,52 @@ class AdminPanel {
       })
     })
   }
-
+  
   // ивенты
   events() {
     this.addBtn.addEventListener('click', () => {
       this.form.id = 'newList';
       this.inputs.forEach(input => input.value = '');      
-      this.openPopup();
-      this.saveBtnEvent();
+      this.openPopup();      
     });
     this.closeBtn.addEventListener('click', this.closePopup.bind(this));
     this.cancelBtn.addEventListener('click', this.closePopup.bind(this));    
-  }
-
-  // клик по кнопке сохранить
-  saveBtnEvent(id) {
-   
-    if(this.form.id ==='newList') {
-      this.saveBtn.addEventListener('click', (event) => {
-      event.preventDefault();      
+    this.saveBtn.addEventListener('click', (event) => {
+      event.preventDefault();         
       let body = {};
+      // вызов функции отправки
+      if(this.form.id === 'newList') {
+        // let body = {};
       this.inputs.forEach((input) => {
         if (input.id === 'type') body['type'] = input.value;
         if (input.id === 'name') body['name'] = input.value;
         if (input.id === 'units') body['units'] = input.value;
         if (input.id === 'cost') body['cost'] = input.value;
       });      
-      // вызов функции отправки
-      this.postData(body)
-        .then(response => {
-          this.inputs.forEach(input => input.value = '');
-        })
-        .catch(err => console.error(err))      
-      this.currentTable();
-      })
-    }
-    if(this.form.id ==='editList') {
-      this.saveBtn.addEventListener('click', () => {        
-        event.preventDefault();
-        let body = {};
-        this.inputs.forEach((input) => {
-          if (input.id === 'type') body['type'] = input.value;
-          if (input.id === 'name') body['name'] = input.value;
-          if (input.id === 'units') body['units'] = input.value;
-          if (input.id === 'cost') body['cost'] = input.value;
-        });  
+        this.postData(body)
+          .then(response => {
+            this.inputs.forEach(input => input.value = '');
+          })
+          .catch(err => console.error(err))      
+        this.currentTable();
+      } else {
+          // let body = {};
+      this.inputs.forEach((input) => {
+        if (input.id === 'type') body['type'] = input.value;
+        if (input.id === 'name') body['name'] = input.value;
+        if (input.id === 'units') body['units'] = input.value;
+        if (input.id === 'cost') body['cost'] = input.value;
+      });      
 
+        let id = this.form.id;
         this.changeData(id, body)
-        .then(response  => {         
-          this.currentTable();
-          this.editData();
-        })     
-        .catch(err => console.error(err));
-      })
-    }
+          .then(response  => {         
+            this.currentTable();
+            this.editData();
+          })     
+          .catch(err => console.error(err));
+      }
+    })
   }
 }
 
